@@ -21,12 +21,16 @@ import java.util.logging.Logger;
 public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceColecionador {
     
     InterfaceCoordenador coord;
+    Colecao colecao;
+    long id;
     
     public ColecionadorImpl() throws RemoteException {
         try {
             Registry refSN = LocateRegistry.getRegistry("localhost", 1099);
             //pega no serviços de nomes a referência do servidor
             coord = (InterfaceCoordenador) refSN.lookup("RefCoordenador");
+            id = coord.registraColecionador(this);
+            this.colecao = new Colecao(id);
         } catch (NotBoundException ex) {
             Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
         } catch (AccessException ex) {
@@ -47,6 +51,11 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
     @Override
     public void abordar() throws RemoteException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Colecao getColecao() throws RemoteException {
+        return colecao;
     }
     
 }

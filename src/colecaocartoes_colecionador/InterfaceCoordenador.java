@@ -18,5 +18,6 @@ public interface InterfaceCoordenador extends Remote {
     public void efetivacaoOk() throws RemoteException;
     public void obterDecisao() throws RemoteException;
     public List<Colecao> consultarColecoes() throws RemoteException;
+    public long registraColecionador(InterfaceColecionador col) throws RemoteException;
     
 }
