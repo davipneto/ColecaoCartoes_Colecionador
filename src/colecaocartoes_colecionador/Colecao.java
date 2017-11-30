@@ -34,8 +34,39 @@ public class Colecao implements Serializable {
         this.trava = false;
     }
     
-    enum Cartao {
+    public enum Cartao {
         CIDADE, ANIMAL, PAISAGEM
     }
-    
+
+    public long getId_colecionador() {
+        return id_colecionador;
+    }
+
+    public void setId_colecionador(long id_colecionador) {
+        this.id_colecionador = id_colecionador;
+    }
+
+    public Map<Cartao, Integer> getCartoesQtd() {
+        return cartoesQtd;
+    }
+
+    public void setCartoesQtd(Map<Cartao, Integer> cartoesQtd) {
+        this.cartoesQtd = cartoesQtd;
+    }
+
+    public Map<Cartao, Double> getCartoesPreco() {
+        return cartoesPreco;
+    }
+
+    public void setCartoesPreco(Map<Cartao, Double> cartoesPreco) {
+        this.cartoesPreco = cartoesPreco;
+    }
+
+    public boolean isTrava() {
+        return trava;
+    }
+
+    public void setTrava(boolean trava) {
+        this.trava = trava;
+    }
 }

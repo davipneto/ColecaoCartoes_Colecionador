@@ -21,7 +21,11 @@ public class ColecaoCartoes_Colecionador {
     public static void main(String[] args) {
         try {
             ColecionadorImpl colecionador = new ColecionadorImpl();
-            //chamar o Frame
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    new ColecaoCartoes(colecionador).setVisible(true);
+                }
+            });
         } catch (RemoteException ex) {
             Logger.getLogger(ColecaoCartoes_Colecionador.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -55,7 +55,10 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
 
     @Override
     public Colecao getColecao() throws RemoteException {
-        return colecao;
+        if(colecao.trava)
+            return null;
+        else
+            return colecao;
     }
     
 }
