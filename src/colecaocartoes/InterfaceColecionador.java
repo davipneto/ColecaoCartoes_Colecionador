@@ -13,11 +13,11 @@ import java.rmi.*;
  */
 public interface InterfaceColecionador extends Remote {
     
-    public boolean desejaEfetivar() throws RemoteException;
-    public void efetivar() throws RemoteException;
-    public void abortar() throws RemoteException;
-    public boolean removerCartão(Colecao.Cartao cartao, Integer qntd) throws RemoteException;
-    public boolean inserirCartão(Colecao.Cartao cartao, Integer qntd) throws RemoteException;
-    public Colecao getColecao() throws RemoteException;
+    public boolean desejaEfetivar(int transacao) throws RemoteException;
+    public void efetivar(int transacao) throws RemoteException;
+    public void abortar(int transacao) throws RemoteException;
+    public boolean removerCartão(int transacao, Colecao.Cartao cartao, Integer qntd) throws RemoteException;
+    public boolean inserirCartão(int transacao, Colecao.Cartao cartao, Integer qntd) throws RemoteException;
+    public Colecao getColecao(int transacao) throws RemoteException;
     
 }

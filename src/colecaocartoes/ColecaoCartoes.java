@@ -434,7 +434,7 @@ public class ColecaoCartoes extends javax.swing.JFrame {
 
     private void BGetCollectionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BGetCollectionsActionPerformed
         try {
-            List<Colecao> todasColec = colecionador.coord.consultarColecoes();
+            List<Colecao> todasColec = colecionador.coord.consultarColecoes(0);
             if(todasColec!=null)
                 updateTable(todasColec);
         } catch (RemoteException ex) {
@@ -444,7 +444,7 @@ public class ColecaoCartoes extends javax.swing.JFrame {
 
     private void BRefresh2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BRefresh2ActionPerformed
         try {
-            List<Colecao> todasColec = colecionador.coord.consultarColecoes();
+            List<Colecao> todasColec = colecionador.coord.consultarColecoes(0);
             updateTable(todasColec);
         } catch (RemoteException ex) {
             Logger.getLogger(ColecaoCartoes.class.getName()).log(Level.SEVERE, null, ex);
@@ -471,7 +471,7 @@ public class ColecaoCartoes extends javax.swing.JFrame {
                     Integer qntd2 = Integer.parseInt(jTQntd2.getText());
                     long id_colec2 = Long.parseLong(jTable2.getValueAt(linha, 0).toString());
                     
-                    colecionador.coord.trocarCartoes(type1,type2,qntd1,qntd2,this.colecionador.id,id_colec2);
+                    colecionador.coord.trocarCartoes(0, type1,type2,qntd1,qntd2,this.colecionador.id,id_colec2);
                     
                     clean();
                     updateTable();
