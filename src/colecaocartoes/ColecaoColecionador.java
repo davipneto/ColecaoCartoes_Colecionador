@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package colecaocartoes_colecionador;
+package colecaocartoes;
 
 import java.io.Serializable;
+
 
 /**
  *
@@ -13,7 +14,7 @@ import java.io.Serializable;
  */
 public class ColecaoColecionador implements Serializable {
     
-    Colecao colecao;
-    InterfaceColecionador colecionador;
+    public Colecao colecao;
+    public InterfaceColecionador colecionador;
     
 }
