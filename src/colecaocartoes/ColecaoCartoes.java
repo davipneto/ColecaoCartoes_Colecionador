@@ -1,49 +1,41 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package colecaocartoes;
 
 import java.rmi.RemoteException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
- *
- * @author geova
+ * A classe ColecaoCartoes implementa um JFrame que exibe as opções de adicionar, receber e trocar cartões
+ * de forma visual
+ * @author Davi Pereira Neto
+ * @author Geovana Franco Santos
  */
 public class ColecaoCartoes extends javax.swing.JFrame {
 
+    //referencia ao colecionador
     ColecionadorImpl colecionador;
 
     /**
-     * Creates new form ColecaoCartoes
+     * Cria o formulário
      *
-     * @param colecionador
+     * @param colecionador com a referência ao colecionador
      */
     public ColecaoCartoes(ColecionadorImpl colecionador) {
         initComponents();
+        //seta visibilidade dos panels
         jPanelAdd.setVisible(false);
         jPanelExchange.setVisible(false);
         this.colecionador = colecionador;
+        //coloca o título do frame
+        this.setTitle("Colecionador " + this.colecionador.id);
+        //seta formato dos combobox a partir dos tipos de cartões
         CBType.setModel(new DefaultComboBoxModel<>(Colecao.Cartao.values()));
         CBTypeEx1.setModel(new DefaultComboBoxModel<>(Colecao.Cartao.values()));
-        CBTypeEx2.setModel(new DefaultComboBoxModel<>(Colecao.Cartao.values()));
-        this.setTitle("Colecionador " + this.colecionador.id);
-    }
-
-    public ColecaoCartoes() {
-        initComponents();
-        jPanelAdd.setVisible(false);
-        CBType.setModel(new DefaultComboBoxModel<>(Colecao.Cartao.values()));
+        CBTypeEx2.setModel(new DefaultComboBoxModel<>(Colecao.Cartao.values()));        
     }
 
     /**
@@ -401,8 +393,12 @@ public class ColecaoCartoes extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Botão que exibe panel para adicionar cartões
+     * @param evt 
+     */
     private void jBAddCardsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBAddCardsActionPerformed
-        // TODO add your handling code here:
+        //muda a visibilidade do panel
         if (jPanelAdd.isVisible()) {
             jPanelAdd.setVisible(false);
         } else {
@@ -410,31 +406,58 @@ public class ColecaoCartoes extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jBAddCardsActionPerformed
 
+    /**
+     * Botão para limpar campos de adição de cartões
+     * @param evt 
+     */
     private void BCleanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BCleanActionPerformed
-        // TODO add your handling code here:
+        //chama o método para limpar
         clean();
     }//GEN-LAST:event_BCleanActionPerformed
 
+    /**
+     * Botão que adiciona a quantidade no cartão especificado da coleção
+     * @param evt 
+     */
     private void BNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BNewActionPerformed
+        //se algum dado não foi informado
         if (!CBType.getSelectedItem().equals(-1) || TQntd.getText().isEmpty()) {
             Colecao.Cartao type = (Colecao.Cartao) CBType.getSelectedItem();
             Integer qntd = Integer.parseInt(TQntd.getText());
-            colecionador.colecao.cartoesQtd.put(type, colecionador.colecao.cartoesQtd.get(type) + qntd);
-
+            try {
+                //atualiza quantidade do cartão
+                colecionador.inserirCartão(0, type, qntd);
+            } catch (RemoteException ex) {
+                Logger.getLogger(ColecaoCartoes.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            //colecionador.colecao.cartoesQtd.put(type, colecionador.colecao.cartoesQtd.get(type) + qntd);
+            //limpa os campos
             clean();
+            //atualiza tabela
             updateTable();
         } else {
             JOptionPane.showMessageDialog(null, "Preencha os dados");
         }
     }//GEN-LAST:event_BNewActionPerformed
 
+    /**
+     * Botão para atualizar tabela.
+     * @param evt 
+     */
     private void BRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BRefreshActionPerformed
+        //atualiza tabela
         updateTable();
     }//GEN-LAST:event_BRefreshActionPerformed
 
+    /**
+     * Botão para pegar as coleções de todos colecionadores no sistema.
+     * @param evt 
+     */
     private void BGetCollectionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BGetCollectionsActionPerformed
         try {
+            //faz a consulta ao coordenador
             List<Colecao> todasColec = colecionador.coord.consultarColecoes(0);
+            //se não for uma resposta nula atualiza tabela
             if(todasColec!=null)
                 updateTable(todasColec);
         } catch (RemoteException ex) {
@@ -442,16 +465,28 @@ public class ColecaoCartoes extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_BGetCollectionsActionPerformed
 
+    /**
+     * Botão para atualizazr tabela de todas coleções.
+     * @param evt 
+     */
     private void BRefresh2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BRefresh2ActionPerformed
         try {
+            //faz a consulta ao coordenador
             List<Colecao> todasColec = colecionador.coord.consultarColecoes(0);
-            updateTable(todasColec);
+            //se não for uma resposta nula atualiza tabela
+            if(todasColec!=null)
+                updateTable(todasColec);
         } catch (RemoteException ex) {
             Logger.getLogger(ColecaoCartoes.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_BRefresh2ActionPerformed
 
+    /**
+     * Botão que exibe panel para trocas
+     * @param evt 
+     */
     private void BExchangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BExchangeActionPerformed
+        //atualiza visibilidade
         if (jPanelExchange.isVisible()) {
             jPanelExchange.setVisible(false);
         } else {
@@ -459,9 +494,16 @@ public class ColecaoCartoes extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_BExchangeActionPerformed
 
+    /**
+     * Botão que realiza as trocas
+     * @param evt 
+     */
     private void BExchangeCardsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BExchangeCardsActionPerformed
+        //pega a linha selecionada
         int linha = jTable2.getSelectedRow();
+        //se alguma linha foi selecionada
         if (linha != -1) {
+            //se algum campo foi deixado em branco
             if (!CBTypeEx1.getSelectedItem().equals(-1) || !CBTypeEx2.getSelectedItem().equals(-1) || jTQntd1.getText().isEmpty() || jTQntd2.getText().isEmpty()) {
                 
                 try {
@@ -470,10 +512,11 @@ public class ColecaoCartoes extends javax.swing.JFrame {
                     Integer qntd1 = Integer.parseInt(jTQntd1.getText());
                     Integer qntd2 = Integer.parseInt(jTQntd2.getText());
                     long id_colec2 = Long.parseLong(jTable2.getValueAt(linha, 0).toString());
-                    
+                    //realiza a troca de cartões
                     colecionador.coord.trocarCartoes(0, type1,type2,qntd1,qntd2,this.colecionador.id,id_colec2);
-                    
+                    //limpa os campos
                     clean();
+                    //atualiza tabela
                     updateTable();
                 } catch (RemoteException ex) {
                     Logger.getLogger(ColecaoCartoes.class.getName()).log(Level.SEVERE, null, ex);
@@ -487,51 +530,50 @@ public class ColecaoCartoes extends javax.swing.JFrame {
 
     }//GEN-LAST:event_BExchangeCardsActionPerformed
 
+    /**
+     * Método que atualiza a tabela com os cartões de todas as coleções
+     * @param todasColec com as coleções
+     */
     public void updateTable(List<Colecao> todasColec) {
         DefaultTableModel tableModel = (DefaultTableModel) jTable2.getModel();
-        //atualizar a tabela a partir dos dados do servidor
         tableModel.setRowCount(0);
         for (Colecao c : todasColec) {
-            if(c.cartoesQtd.get(Colecao.Cartao.ANIMAL)!=0)
-                tableModel.addRow(new Object[]{c.id_colecionador, Colecao.Cartao.ANIMAL.toString(), c.cartoesQtd.get(Colecao.Cartao.ANIMAL)});
-            if(c.cartoesQtd.get(Colecao.Cartao.CIDADE)!=0)
-                tableModel.addRow(new Object[]{c.id_colecionador, Colecao.Cartao.CIDADE.toString(), c.cartoesQtd.get(Colecao.Cartao.CIDADE)});
-            if(c.cartoesQtd.get(Colecao.Cartao.PAISAGEM)!=0)
-                tableModel.addRow(new Object[]{c.id_colecionador, Colecao.Cartao.PAISAGEM.toString(), c.cartoesQtd.get(Colecao.Cartao.PAISAGEM)});
+            for(Colecao.Cartao types : Colecao.Cartao.values()){
+                if(c.cartoesQtd.get(types)!=0)
+                tableModel.addRow(new Object[]{c.id_colecionador, types.toString(), c.cartoesQtd.get(types)});
+            }
         }
         jTable2.setModel(tableModel);
         tableModel.fireTableDataChanged();
     }
 
+    /**
+     * Atualiza tabela.
+     */
     public void updateTable() {
         DefaultTableModel tableModel = (DefaultTableModel) jTable1.getModel();
         //atualizar a tabela a partir dos dados do servidor
         tableModel.setRowCount(0);
-
-        tableModel.addRow(new Object[]{Colecao.Cartao.ANIMAL.toString(), colecionador.colecao.cartoesQtd.get(Colecao.Cartao.ANIMAL)});
-        tableModel.addRow(new Object[]{Colecao.Cartao.CIDADE.toString(), colecionador.colecao.cartoesQtd.get(Colecao.Cartao.CIDADE)});
-        tableModel.addRow(new Object[]{Colecao.Cartao.PAISAGEM.toString(), colecionador.colecao.cartoesQtd.get(Colecao.Cartao.PAISAGEM)});
-
+        for(Colecao.Cartao types : Colecao.Cartao.values()){
+                if(colecionador.colecao.cartoesQtd.get(types)!=0)
+                tableModel.addRow(new Object[]{types.toString(), colecionador.colecao.cartoesQtd.get(types)});
+            }
         jTable1.setModel(tableModel);
         tableModel.fireTableDataChanged();
     }
 
+    /**
+     * Limpa campos.
+     */
     public void clean() {
         CBType.setSelectedIndex(-1);
+        CBTypeEx1.setSelectedIndex(-1);
+        CBTypeEx2.setSelectedIndex(-1);
         TQntd.setText("");
+        jTQntd1.setText("");
+        jTQntd2.setText("");
         updateTable();
     }
-    /**
-     * @param args the command line arguments
-     */
-    /*public static void main(String args[]) {
-        /* Create and display the form */
- /*java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ColecaoCartoes().setVisible(true);
-            }
-        });
-    }*/
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BClean;
