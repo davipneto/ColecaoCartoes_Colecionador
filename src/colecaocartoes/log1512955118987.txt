@@ -1,5 +1,0 @@
-Log do colecionador 1512955118987
-0 inserirCartão ANIMAL 2
-0 efetivada
-0 GetColecao 1512955118987
-0 efetivada

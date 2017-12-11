@@ -1,8 +1,0 @@
-Log do colecionador 1512955104247
-0 inserirCartão CIDADE 2
-0 efetivada
-0 GetColecao 1512955104247
-0 efetivada
-0 remover CIDADE 2 provisório
-0 inserir ANIMAL 2 provisório
-0 abortada

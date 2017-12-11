@@ -1,7 +1,0 @@
-Log do colecionador 1512953895076
-0 inserirCartão CIDADE 1
-0 efetivada
-0 GetColecao 1512953895076
-0 efetivada
-0 GetColecao 1512953895076
-0 efetivada
