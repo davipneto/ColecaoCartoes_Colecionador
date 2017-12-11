@@ -1,0 +1,10 @@
+Log do colecionador 1512954123828
+0 inserirCartão ANIMAL 1
+0 efetivada
+0 GetColecao 1512954123828
+0 efetivada
+0 inserir ANIMAL 1 provisório
+0 inserir CIDADE 1 provisório
+0 abortada
+0 GetColecao 1512954123828
+0 efetivada

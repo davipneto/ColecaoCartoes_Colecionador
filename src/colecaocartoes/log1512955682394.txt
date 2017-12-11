@@ -1,0 +1,11 @@
+Log do colecionador 1512955682394
+0 inserirCartão ANIMAL 2
+0 efetivada
+0 GetColecao 1512955682394
+0 efetivada
+0 remover ANIMAL 1 provisório
+0 inserir CIDADE 1 provisório
+0 removerCartão ANIMAL 1
+0 efetivada
+0 inserirCartão CIDADE 1
+0 efetivada

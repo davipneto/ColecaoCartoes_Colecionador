@@ -1,7 +1,11 @@
 package colecaocartoes;
 
+import colecaocartoes.Colecao.Cartao;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.rmi.AccessException;
@@ -46,12 +50,12 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
             //inicializa coleção com o id do colecionador
             this.colecao = new Colecao(id);
             //cria um arquivo de log
-            String endFile = "E:\\Geovana\\UTFPR\\9º Semestre\\Sistemas Distribuidos\\ColecaoCartoes_Colecionador\\src\\colecaocartoes\\log"+id+".txt";
+            String endFile = "E:\\Geovana\\UTFPR\\9º Semestre\\Sistemas Distribuidos\\ColecaoCartoes_Colecionador\\src\\colecaocartoes\\log" + id + ".txt";
             this.log1 = new File(endFile);
             log1.createNewFile();
 
             //escreve no arquivo o cabeçalho do log
-            BufferedWriter buffLog = new BufferedWriter(new FileWriter(this.log1));
+            BufferedWriter buffLog = new BufferedWriter(new FileWriter(this.log1, true));
             buffLog.write("Log do colecionador " + this.id);
             buffLog.newLine();
 
@@ -72,11 +76,62 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
      * Método para verificar se o colecionador deseja efetivar a transação.
      *
      * @param transacao com o número da transação
+     * @param tipoTransacao com o tipo de transação a ser realizada
+     * @param cartao com o tipo de cartão a ser transacionado
+     * @param qntd com a quantidade a ser transacionado
      * @return boolean com a decisão do colecionador
      * @throws RemoteException
      */
     @Override
-    public boolean desejaEfetivar(int transacao) throws RemoteException {
+    public boolean desejaEfetivar(int transacao, String tipoTransacao, Colecao.Cartao cartao, Integer qntd) throws RemoteException {
+        BufferedWriter buffLog = null;
+        int qntdTrans = 0;
+        try {
+            buffLog = new BufferedWriter(new FileWriter(this.log1, true));
+            if (tipoTransacao.equals("remover")) {
+                while (!colecao.trava) {
+                    //coloca trava na coleção
+                    colecao.setTrava(true);
+                    //verifica se possui a quantidade que deseja remover
+                    //se não possui remove o quanto tiver
+                    if (colecao.cartoesQtd.get(cartao) <= qntd) {
+                        qntdTrans = colecao.cartoesQtd.get(cartao);
+                    } else {
+                        qntdTrans = qntd;
+                    }
+                    //salva no log transação
+                    buffLog.write(transacao + " remover " + cartao + " " + qntd + " provisório");
+                    buffLog.newLine();
+                    //libera a trava
+                    colecao.setTrava(false);
+                    //retorna status final da transação
+                    return true;
+                }
+                return false;
+            } else {
+                while (!colecao.trava) {
+                    //coloca trava na coleção
+                    colecao.setTrava(true);
+                    //atualiza a quantidade do tipo de cartão na coleção
+                    //colecao.cartoesQtd.put(cartao, colecao.cartoesQtd.get(cartao) + qntd);
+                    //escreve no log status final da transação
+                    buffLog.write(transacao + " inserir " + cartao + " " + qntd + " provisório");
+                    buffLog.newLine();
+                    //libera trava
+                    colecao.setTrava(false);
+                    //retorna status final da transação
+                    return true;
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                buffLog.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         return false;
     }
 
@@ -88,7 +143,26 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
      */
     @Override
     public void efetivar(int transacao) throws RemoteException {
-
+        try {
+            //buscar no log as transações
+            BufferedReader buffLog = new BufferedReader(new FileReader(this.log1));
+            String linha;
+            String linha_s[];
+            while ((linha = buffLog.readLine()) != null) {
+                linha_s = linha.split(" ");
+                if(linha_s[0].equals(String.valueOf(transacao))){
+                    if(linha_s[1].equals("remover")){
+                        this.removerCartão(transacao, Cartao.valueOf(linha_s[2]), Integer.parseInt(linha_s[3]));
+                    } else if (linha_s[1].equals("inserir")){
+                        this.inserirCartão(transacao, Cartao.valueOf(linha_s[2]), Integer.parseInt(linha_s[3]));
+                    }
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -99,7 +173,21 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
      */
     @Override
     public void abortar(int transacao) throws RemoteException {
-
+            BufferedWriter buffLog = null;
+        try {
+            buffLog = new BufferedWriter(new FileWriter(this.log1, true));
+            //Transação abortada
+            buffLog.write(transacao + " abortada");
+            buffLog.newLine();
+        } catch (IOException ex) {
+            Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                buffLog.close();
+            } catch (IOException ex) {
+                Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     /**
@@ -113,20 +201,20 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
     public Colecao getColecao(int transacao) throws RemoteException {
         BufferedWriter buffLog = null;
         try {
-            buffLog = new BufferedWriter(new FileWriter(this.log1));
+            buffLog = new BufferedWriter(new FileWriter(this.log1, true));
             //escreve no log a tentativa de transação
-            buffLog.write("Tentativa GetColecao " + this.id);
+            buffLog.write(transacao + " GetColecao " + this.id);
             buffLog.newLine();
             //enquanto não esta travada a coleção
             while (!colecao.isTrava()) {
                 //escreve o status final da transação
-                buffLog.write("Sucesso GetColecao " + this.id);
+                buffLog.write(transacao + " efetivada");
                 buffLog.newLine();
                 //retorna coleção
                 return colecao;
             }
             //se não der certo escreve status final da transação
-            buffLog.write("Falha GetColecao " + this.id);
+            buffLog.write(transacao + " abortada");
             buffLog.newLine();
         } catch (IOException ex) {
             Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
@@ -155,9 +243,9 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
         BufferedWriter buffLog = null;
         try {
             Integer qntdTrans = 0;
-            buffLog = new BufferedWriter(new FileWriter(this.log1));
-            //escreve log da tentativa de remoção
-            buffLog.write("Tentativa Remover " + this.id + " " + cartao + " " + qntd);
+            buffLog = new BufferedWriter(new FileWriter(this.log1, true));
+            //coloca o nome da transação
+            buffLog.write(transacao + " removerCartão " + cartao + " " + qntd);
             buffLog.newLine();
             //enquanto não está travada a coleção
             while (!colecao.trava) {
@@ -173,7 +261,7 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
                 //atualiza a quantidade do tipo de cartão na coleção
                 colecao.cartoesQtd.put(cartao, colecao.cartoesQtd.get(cartao) - qntdTrans);
                 //escreve no log status final da transação
-                buffLog.write("Sucesso Remover " + this.id + " " + cartao + " " + qntd);
+                buffLog.write(transacao + " efetivada");
                 buffLog.newLine();
                 //libera a trava
                 colecao.setTrava(false);
@@ -181,7 +269,7 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
                 return true;
             }
             //caso de errado escreve no log status final da transação
-            buffLog.write("Falha Remover " + this.id + " " + cartao + " " + qntd);
+            buffLog.write(transacao + " abortada");
             buffLog.newLine();
         } catch (IOException ex) {
             Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);
@@ -209,9 +297,9 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
     public boolean inserirCartão(int transacao, Colecao.Cartao cartao, Integer qntd) throws RemoteException {
         BufferedWriter buffLog = null;
         try {
-            buffLog = new BufferedWriter(new FileWriter(this.log1));
-            //escreve no log a tentativa de inserir
-            buffLog.write("Tentativa Inserir " + this.id + " " + cartao + " " + qntd);
+            buffLog = new BufferedWriter(new FileWriter(this.log1, true));
+            //coloca o nome da transação
+            buffLog.write(transacao + " inserirCartão " + cartao + " " + qntd);
             buffLog.newLine();
             //enquanto não estiver travada a coleção
             while (!colecao.trava) {
@@ -220,7 +308,7 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
                 //atualiza a quantidade do tipo de cartão na coleção
                 colecao.cartoesQtd.put(cartao, colecao.cartoesQtd.get(cartao) + qntd);
                 //escreve no log status final da transação
-                buffLog.write("Sucesso Inserir " + this.id + " " + cartao + " " + qntd);
+                buffLog.write(transacao + " efetivada");
                 buffLog.newLine();
                 //libera trava
                 colecao.setTrava(false);
@@ -228,7 +316,7 @@ public class ColecionadorImpl extends UnicastRemoteObject implements InterfaceCo
                 return true;
             }
             //caso de errado escreve no log status final da transação
-            buffLog.write("Falha Inserir " + this.id + " " + cartao + " " + qntd);
+            buffLog.write(transacao + " abortada");
             buffLog.newLine();
         } catch (IOException ex) {
             Logger.getLogger(ColecionadorImpl.class.getName()).log(Level.SEVERE, null, ex);

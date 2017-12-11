@@ -1,0 +1,11 @@
+Log do colecionador 1512954523246
+0 inserirCartão CIDADE 2
+0 efetivada
+0 GetColecao 1512954523246
+0 efetivada
+0 GetColecao 1512954523246
+0 efetivada
+0 GetColecao 1512954523246
+0 efetivada
+0 inserir CIDADE 1 provisório
+0 inserir ANIMAL 1 provisório
